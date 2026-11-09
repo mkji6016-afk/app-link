@@ -1,0 +1,586 @@
+import React, { useState } from 'react';
+import { 
+  Recycle, 
+  Factory, 
+  TrendingUp, 
+  Leaf, 
+  ShieldCheck, 
+  Award, 
+  RotateCcw, 
+  CheckCircle2, 
+  XCircle, 
+  ArrowRight,
+  HelpCircle,
+  Sparkles,
+  Lightbulb,
+  BookOpen
+} from 'lucide-react';
+
+export default function App() {
+  // Decision Game State
+  const [gameStep, setGameStep] = useState(0);
+  const [gameScores, setGameScores] = useState({ profit: 50, eco: 50 });
+  const [gameChoices, setGameChoices] = useState([]);
+  const [gameFinished, setGameFinished] = useState(false);
+
+  // Quiz State
+  const [userAnswers, setUserAnswers] = useState({});
+  const [quizSubmitted, impQuizSubmitted] = useState(false);
+
+  // Decision Simulator Scenarios
+  const scenarios = [
+    {
+      title: "Step 1: Collection Strategy (Reverse Logistics)",
+      description: "How will your company collect plastic bottle caps from people?",
+      options: [
+        {
+          text: "Offer reward points for every 20 caps brought to school or store collection bins.",
+          profitChange: -5,
+          ecoChange: +25,
+          feedback: "Great move! High consumer participation yields a reliable supply of clean, single-material plastic."
+        },
+        {
+          text: "Buy raw recycled plastic from overseas suppliers.",
+          profitChange: +10,
+          ecoChange: -15,
+          feedback: "Shipping plastic across the ocean increases carbon emissions and shipping costs over time."
+        }
+      ]
+    },
+    {
+      title: "Step 2: Manufacturing Method",
+      description: "What will you make out of the collected plastic caps?",
+      options: [
+        {
+          text: "Grind, melt, and compress them into durable phone stands and keychains.",
+          profitChange: +20,
+          ecoChange: +20,
+          feedback: "Awesome! High-value small goods generate good profit while repurposing waste."
+        },
+        {
+          text: "Burn them for quick energy production at your factory.",
+          profitChange: +15,
+          ecoChange: -30,
+          feedback: "Burning plastic releases toxic gases and carbon dioxide, damaging your ESG score!"
+        }
+      ]
+    },
+    {
+      title: "Step 3: Marketing & ESG Strategy",
+      description: "How will you market your new upcycled products?",
+      options: [
+        {
+          text: "Partner with local eco-clubs and show transparent plastic recycling data.",
+          profitChange: +15,
+          ecoChange: +20,
+          feedback: "Gen Z and conscious shoppers love authentic green brands. Your brand reputation skyrockets!"
+        },
+        {
+          text: "Paint products green and claim they save the world without sharing proof (Greenwashing).",
+          profitChange: -20,
+          ecoChange: -25,
+          feedback: "Customers found out you greenwashed! Brand trust dropped significantly."
+        }
+      ]
+    }
+  ];
+
+  const handleChoice = (option) => {
+    const newProfit = Math.max(0, Math.min(100, gameScores.profit + option.profitChange));
+    const newEco = Math.max(0, Math.min(100, gameScores.eco + option.ecoChange));
+    setGameScores({ profit: newProfit, eco: newEco });
+    setGameChoices([...gameChoices, { ...option, stepTitle: scenarios[gameStep].title }]);
+
+    if (gameStep + 1 < scenarios.length) {
+      setGameStep(gameStep + 1);
+    } else {
+      setGameFinished(true);
+    }
+  };
+
+  const restartGame = () => {
+    setGameStep(0);
+    setGameScores({ profit: 50, eco: 50 });
+    setGameChoices([]);
+    setGameFinished(false);
+  };
+
+  // 5 Quiz Questions
+  const quizQuestions = [
+    {
+      id: 1,
+      question: "Why do traditional recycling centers often miss plastic bottle caps?",
+      options: [
+        "They are made of toxic glass",
+        "They are too small and slip through sorting machines",
+        "They melt too quickly in rainwater",
+        "Recycling machines refuse to touch plastic"
+      ],
+      correct: 1,
+      explanation: "Because bottle caps are tiny, they fall through screen sorters in traditional recycling facilities and end up in landfills or ocean waste."
+    },
+    {
+      id: 2,
+      question: "What is 'Reverse Logistics' in sustainable business?",
+      options: [
+        "Driving delivery trucks backward to save gas",
+        "Collecting used materials back from consumers to recycle them",
+        "Selling old products at double the original price",
+        "Stopping all product shipping to lower tax"
+      ],
+      correct: 1,
+      explanation: "Reverse logistics means taking products or materials back from consumers after use so they can be recycled or remanufactured."
+    },
+    {
+      id: 3,
+      question: "Which manufacturing step turns ground plastic caps into new products?",
+      options: [
+        "Melting and Compression molding",
+        "Freezing and chopping",
+        "Paper soaking",
+        "Solar evaporation"
+      ],
+      correct: 0,
+      explanation: "Plastic caps (HDPE/PP) are shredded into tiny flakes, heated to melt, and compressed into solid shapes like keychains or tiles."
+    },
+    {
+      id: 4,
+      question: "What does 'ESG' stand for in corporate business management?",
+      options: [
+        "Electricity, Solar, Gas",
+        "Environmental, Social, and Governance",
+        "Economic Safety Goal",
+        "Easy Shopping Group"
+      ],
+      correct: 1,
+      explanation: "ESG stands for Environmental, Social, and Governance. It measures how responsibly a company treats nature, people, and ethics."
+    },
+    {
+      id: 5,
+      question: "Why is bottle cap upcycling good for business profit?",
+      options: [
+        "It lowers raw material costs and builds customer loyalty",
+        "It allows companies to avoid paying any employee wages",
+        "It makes factories invisible to local governments",
+        "It eliminates the need for electricity"
+      ],
+      correct: 0,
+      explanation: "Using waste plastic lowers the cost of buying new raw plastic materials while attracting eco-conscious customers who prefer green products."
+    }
+  ];
+
+  const handleSelectAnswer = (qId, optionIdx) => {
+    if (quizSubmitted) return;
+    setUserAnswers({ ...userAnswers, [qId]: optionIdx });
+  };
+
+  const calculateQuizScore = () => {
+    let score = 0;
+    quizQuestions.forEach((q) => {
+      if (userAnswers[q.id] === q.correct) {
+        score++;
+      }
+    });
+    return score;
+  };
+
+  return (
+    <div className="min-h-screen bg-[#112a20] text-gray-100 font-sans selection:bg-[#2d6a4f] selection:text-white pb-12">
+      {/* HEADER */}
+      <header className="bg-[#1b4332] border-b border-[#2d6a4f] sticky top-0 z-50 shadow-md">
+        <div className="max-w-4xl mx-auto px-4 py-4 flex items-center justify-between">
+          <div className="flex items-center space-x-3">
+            <div className="p-2 bg-[#2d6a4f] rounded-xl text-[#d8f3dc]">
+              <Recycle className="w-6 h-6 animate-spin-slow" />
+            </div>
+            <div>
+              <h1 className="text-xl font-bold tracking-tight text-white">Eco-Cap Business Challenge</h1>
+              <p className="text-xs text-[#d8f3dc] opacity-90">Upcycling, ESG & Circular Economy</p>
+            </div>
+          </div>
+          <span className="hidden sm:inline-block px-3 py-1 bg-[#2d6a4f]/50 border border-[#40916c] text-[#d8f3dc] text-xs font-medium rounded-full">
+            High School Edition (Ages 15–18)
+          </span>
+        </div>
+      </header>
+
+      <main className="max-w-4xl mx-auto px-4 pt-8 space-y-12">
+
+        {/* HERO INTRO SECTION */}
+        <section className="bg-[#1b4332]/70 border border-[#2d6a4f] rounded-2xl p-6 sm:p-8 shadow-xl relative overflow-hidden backdrop-blur-sm">
+          <div className="absolute top-0 right-0 -mt-6 -mr-6 w-32 h-32 bg-[#40916c]/20 rounded-full blur-2xl pointer-events-none" />
+          
+          <div className="inline-flex items-center space-x-2 px-3 py-1 rounded-full bg-[#d8f3dc] text-[#1b4332] text-xs font-bold mb-4">
+            <Sparkles className="w-3.5 h-3.5" />
+            <span>Surprising Fact</span>
+          </div>
+
+          <h2 className="text-2xl sm:text-3xl font-extrabold text-white mb-4 leading-tight">
+            Did you know? Over <span className="text-[#74c69d] underline decoration-[#40916c]">20 Billion</span> plastic bottle caps are lost in landfills every year!
+          </h2>
+
+          <p className="text-gray-200 text-base sm:text-lg leading-relaxed mb-6">
+            Because bottle caps are small, standard recycling sorting screens drop them into waste bins. 
+            However, these caps are made from high-quality plastic (<span className="text-[#d8f3dc] font-semibold">HDPE & PP</span>). 
+            By learning <span className="text-[#d8f3dc] font-semibold">Upcycling & Reverse Logistics</span>, we can turn waste plastic into profit while protecting the planet!
+          </p>
+
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-2 border-t border-[#2d6a4f]/60 text-xs sm:text-sm text-[#d8f3dc]">
+            <div className="flex items-center space-x-2">
+              <CheckCircle2 className="w-4 h-4 text-[#74c69d]" />
+              <span>Goal: Learn Circular Business</span>
+            </div>
+            <div className="flex items-center space-x-2">
+              <CheckCircle2 className="w-4 h-4 text-[#74c69d]" />
+              <span>Time: 5 - 10 Minutes</span>
+            </div>
+            <div className="flex items-center space-x-2">
+              <CheckCircle2 className="w-4 h-4 text-[#74c69d]" />
+              <span>Language: Plain English</span>
+            </div>
+          </div>
+        </section>
+
+        {/* 3 KEY IDEAS */}
+        <section className="space-y-6">
+          <div className="text-center sm:text-left">
+            <h2 className="text-xl sm:text-2xl font-bold text-white flex items-center justify-center sm:justify-start space-x-2">
+              <BookOpen className="w-6 h-6 text-[#74c69d]" />
+              <span>3 Core Ideas You Need to Know</span>
+            </h2>
+            <p className="text-sm text-gray-300 mt-1">Connecting Manufacturing, Business Management, and Environmental Care.</p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            {/* Card 1 */}
+            <div className="bg-[#1b4332] border border-[#2d6a4f] rounded-xl p-6 flex flex-col justify-between hover:border-[#74c69d] transition-all shadow-md group">
+              <div>
+                <div className="w-12 h-12 bg-[#2d6a4f] rounded-lg flex items-center justify-center text-[#d8f3dc] mb-4 group-hover:scale-110 transition-transform">
+                  <Factory className="w-6 h-6" />
+                </div>
+                <span className="text-xs font-bold text-[#74c69d] uppercase tracking-wider">Idea 1: Manufacturing</span>
+                <h3 className="text-lg font-bold text-white mt-1 mb-2">Grind & Compress</h3>
+                <p className="text-sm text-gray-300 leading-relaxed">
+                  Clean caps are shredded into small flakes, heated, and molded into durable products like keychains, phone stands, or wall tiles.
+                </p>
+              </div>
+              <div className="mt-4 pt-3 border-t border-[#2d6a4f]/50 text-xs text-[#d8f3dc] font-medium">
+                Turning waste plastic into usable items.
+              </div>
+            </div>
+
+            {/* Card 2 */}
+            <div className="bg-[#1b4332] border border-[#2d6a4f] rounded-xl p-6 flex flex-col justify-between hover:border-[#74c69d] transition-all shadow-md group">
+              <div>
+                <div className="w-12 h-12 bg-[#2d6a4f] rounded-lg flex items-center justify-center text-[#d8f3dc] mb-4 group-hover:scale-110 transition-transform">
+                  <TrendingUp className="w-6 h-6" />
+                </div>
+                <span className="text-xs font-bold text-[#74c69d] uppercase tracking-wider">Idea 2: Business & ESG</span>
+                <h3 className="text-lg font-bold text-white mt-1 mb-2">Reverse Logistics</h3>
+                <p className="text-sm text-gray-300 leading-relaxed">
+                  Companies collect plastic caps back from customers using reward systems. This cuts expensive raw plastic material costs and improves ESG score.
+                </p>
+              </div>
+              <div className="mt-4 pt-3 border-t border-[#2d6a4f]/50 text-xs text-[#d8f3dc] font-medium">
+                Creating value with zero-waste supply chains.
+              </div>
+            </div>
+
+            {/* Card 3 */}
+            <div className="bg-[#1b4332] border border-[#2d6a4f] rounded-xl p-6 flex flex-col justify-between hover:border-[#74c69d] transition-all shadow-md group">
+              <div>
+                <div className="w-12 h-12 bg-[#2d6a4f] rounded-lg flex items-center justify-center text-[#d8f3dc] mb-4 group-hover:scale-110 transition-transform">
+                  <Leaf className="w-6 h-6" />
+                </div>
+                <span className="text-xs font-bold text-[#74c69d] uppercase tracking-wider">Idea 3: Eco Impact</span>
+                <h3 className="text-lg font-bold text-white mt-1 mb-2">Save Oceans & Carbon</h3>
+                <p className="text-sm text-gray-300 leading-relaxed">
+                  Stopping plastic incineration cuts greenhouse gas emissions. It also keeps small plastics out of ocean habitats and protects marine life.
+                </p>
+              </div>
+              <div className="mt-4 pt-3 border-t border-[#2d6a4f]/50 text-xs text-[#d8f3dc] font-medium">
+                Protecting species & fighting climate change.
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* INTERACTIVE SIMULATOR */}
+        <section className="bg-[#1b4332] border border-[#2d6a4f] rounded-2xl p-6 sm:p-8 shadow-xl">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-6 pb-4 border-b border-[#2d6a4f]/70 gap-4">
+            <div>
+              <div className="inline-flex items-center space-x-2 text-[#74c69d] text-xs font-bold uppercase tracking-wider mb-1">
+                <Lightbulb className="w-4 h-4" />
+                <span>Interactive Simulator</span>
+              </div>
+              <h2 className="text-xl sm:text-2xl font-bold text-white">Act as the CEO: Eco-Cap Business Challenge</h2>
+            </div>
+
+            {/* Scoreboard */}
+            <div className="flex items-center space-x-4 bg-[#112a20] px-4 py-2 rounded-xl border border-[#2d6a4f]">
+              <div className="text-center">
+                <span className="text-[10px] text-gray-400 uppercase font-bold block">Business Profit</span>
+                <span className={`text-base font-bold ${gameScores.profit >= 50 ? 'text-[#74c69d]' : 'text-amber-400'}`}>
+                  {gameScores.profit} pts
+                </span>
+              </div>
+              <div className="h-8 w-px bg-[#2d6a4f]" />
+              <div className="text-center">
+                <span className="text-[10px] text-gray-400 uppercase font-bold block">Eco & ESG Score</span>
+                <span className={`text-base font-bold ${gameScores.eco >= 50 ? 'text-[#74c69d]' : 'text-amber-400'}`}>
+                  {gameScores.eco} pts
+                </span>
+              </div>
+            </div>
+          </div>
+
+          {!gameFinished ? (
+            <div className="space-y-6">
+              <div className="flex items-center justify-between text-xs text-[#d8f3dc]">
+                <span>Question {gameStep + 1} of {scenarios.length}</span>
+                <span>{scenarios[gameStep].title}</span>
+              </div>
+
+              <div className="bg-[#112a20]/60 p-5 rounded-xl border border-[#2d6a4f]/50">
+                <h3 className="text-base sm:text-lg font-semibold text-white mb-4">
+                  {scenarios[gameStep].description}
+                </h3>
+
+                <div className="grid grid-cols-1 gap-4">
+                  {scenarios[gameStep].options.map((option, idx) => (
+                    <button
+                      key={idx}
+                      onClick={() => handleChoice(option)}
+                      className="text-left p-4 rounded-xl bg-[#1b4332] hover:bg-[#2d6a4f] border border-[#2d6a4f] hover:border-[#74c69d] transition-all flex items-start justify-between group"
+                    >
+                      <span className="text-sm text-gray-100 font-medium group-hover:text-white pr-4">
+                        {option.text}
+                      </span>
+                      <ArrowRight className="w-5 h-5 text-[#74c69d] shrink-0 mt-0.5 group-hover:translate-x-1 transition-transform" />
+                    </button>
+                  ))}
+                </div>
+              </div>
+            </div>
+          ) : (
+            <div className="text-center space-y-6 py-4">
+              <div className="inline-flex p-4 bg-[#2d6a4f]/40 rounded-full text-[#74c69d] border border-[#40916c]">
+                <Award className="w-10 h-10" />
+              </div>
+              <div>
+                <h3 className="text-2xl font-bold text-white">Simulation Completed!</h3>
+                <p className="text-sm text-gray-300 mt-1">Here is how your choices impacted your business and the planet:</p>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 max-w-md mx-auto">
+                <div className="bg-[#112a20] p-4 rounded-xl border border-[#2d6a4f]">
+                  <span className="text-xs text-gray-400">Final Business Profit</span>
+                  <p className="text-2xl font-extrabold text-[#74c69d] mt-1">{gameScores.profit} / 100</p>
+                </div>
+                <div className="bg-[#112a20] p-4 rounded-xl border border-[#2d6a4f]">
+                  <span className="text-xs text-gray-400">Final Eco & ESG Score</span>
+                  <p className="text-2xl font-extrabold text-[#74c69d] mt-1">{gameScores.eco} / 100</p>
+                </div>
+              </div>
+
+              {/* Decision Log */}
+              <div className="bg-[#112a20]/80 p-4 rounded-xl border border-[#2d6a4f]/60 text-left space-y-3">
+                <h4 className="text-xs font-bold text-[#74c69d] uppercase tracking-wider">Your Decision Recap:</h4>
+                {gameChoices.map((c, i) => (
+                  <div key={i} className="text-xs border-b border-[#2d6a4f]/40 pb-2 last:border-0 last:pb-0">
+                    <p className="font-semibold text-white">{c.stepTitle}</p>
+                    <p className="text-gray-300 mt-0.5">{c.feedback}</p>
+                  </div>
+                ))}
+              </div>
+
+              <button
+                onClick={restartGame}
+                className="inline-flex items-center space-x-2 px-6 py-3 bg-[#2d6a4f] hover:bg-[#40916c] text-white text-sm font-bold rounded-xl transition-colors shadow-lg"
+              >
+                <RotateCcw className="w-4 h-4" />
+                <span>Try Simulator Again</span>
+              </button>
+            </div>
+          )}
+        </section>
+
+        {/* 5-QUESTION QUIZ */}
+        <section className="bg-[#1b4332] border border-[#2d6a4f] rounded-2xl p-6 sm:p-8 shadow-xl space-y-6">
+          <div>
+            <div className="inline-flex items-center space-x-2 text-[#74c69d] text-xs font-bold uppercase tracking-wider mb-1">
+              <HelpCircle className="w-4 h-4" />
+              <span>Knowledge Check</span>
+            </div>
+            <h2 className="text-xl sm:text-2xl font-bold text-white">5-Question Quick Quiz</h2>
+            <p className="text-sm text-gray-300 mt-1">Test what you learned about plastic cap upcycling and ESG strategies!</p>
+          </div>
+
+          <div className="space-y-6">
+            {quizQuestions.map((q, idx) => {
+              const selectedIdx = userAnswers[q.id];
+              const isCorrect = selectedIdx === q.correct;
+
+              return (
+                <div key={q.id} className="bg-[#112a20]/70 p-5 rounded-xl border border-[#2d6a4f]/60 space-y-3">
+                  <h3 className="text-sm sm:text-base font-semibold text-white">
+                    {idx + 1}. {q.question}
+                  </h3>
+
+                  <div className="grid grid-cols-1 gap-2">
+                    {q.options.map((opt, optIdx) => {
+                      let btnStyle = "bg-[#1b4332] text-gray-200 border-[#2d6a4f] hover:bg-[#2d6a4f]";
+                      
+                      if (selectedIdx === optIdx) {
+                        btnStyle = "bg-[#2d6a4f] border-[#74c69d] text-white font-medium";
+                      }
+
+                      if (quizSubmitted) {
+                        if (optIdx === q.correct) {
+                          btnStyle = "bg-emerald-900/80 border-emerald-500 text-emerald-200 font-semibold";
+                        } else if (selectedIdx === optIdx && !isCorrect) {
+                          btnStyle = "bg-rose-900/80 border-rose-500 text-rose-200";
+                        }
+                      }
+
+                      return (
+                        <button
+                          key={optIdx}
+                          disabled={quizSubmitted}
+                          onClick={() => handleSelectAnswer(q.id, optIdx)}
+                          className={`text-left p-3 rounded-lg border text-xs sm:text-sm transition-all flex items-center justify-between ${btnStyle}`}
+                        >
+                          <span>{opt}</span>
+                          {quizSubmitted && optIdx === q.correct && (
+                            <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0 ml-2" />
+                          )}
+                          {quizSubmitted && selectedIdx === optIdx && !isCorrect && (
+                            <XCircle className="w-4 h-4 text-rose-400 shrink-0 ml-2" />
+                          )}
+                        </button>
+                      );
+                    })}
+                  </div>
+
+                  {/* Feedback Explanation */}
+                  {quizSubmitted && (
+                    <div className={`p-3 rounded-lg text-xs leading-relaxed ${isCorrect ? 'bg-emerald-950/60 text-emerald-200 border border-emerald-800' : 'bg-rose-950/60 text-rose-200 border border-rose-800'}`}>
+                      <span className="font-bold block mb-0.5">{isCorrect ? 'Correct!' : 'Incorrect'}</span>
+                      {q.explanation}
+                    </div>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+
+          {/* Quiz Action / Results */}
+          <div className="pt-4 border-t border-[#2d6a4f]/60 flex flex-col sm:flex-row items-center justify-between gap-4">
+            {!quizSubmitted ? (
+              <button
+                onClick={() => setQuizSubmitted(true)}
+                disabled={Object.keys(userAnswers).length < quizQuestions.length}
+                className={`w-full sm:w-auto px-6 py-3 rounded-xl font-bold text-sm transition-all shadow-md ${
+                  Object.keys(userAnswers).length === quizQuestions.length
+                    ? 'bg-[#74c69d] hover:bg-[#52b788] text-[#112a20]'
+                    : 'bg-[#2d6a4f]/50 text-gray-400 cursor-not-allowed border border-[#2d6a4f]'
+                }`}
+              >
+                Submit Answers ({Object.keys(userAnswers).length}/5)
+              </button>
+            ) : (
+              <div className="w-full flex flex-col sm:flex-row items-center justify-between bg-[#112a20] p-4 rounded-xl border border-[#2d6a4f] gap-4">
+                <div>
+                  <span className="text-xs text-gray-400">Your Quiz Score</span>
+                  <p className="text-xl font-bold text-white">
+                    <span className="text-[#74c69d] text-2xl font-black">{calculateQuizScore()}</span> / 5 Correct ({Math.round((calculateQuizScore()/5)*100)}%)
+                  </p>
+                </div>
+                <button
+                  onClick={() => {
+                    setUserAnswers({});
+                    setQuizSubmitted(false);
+                  }}
+                  className="px-4 py-2 bg-[#2d6a4f] hover:bg-[#40916c] text-white text-xs font-bold rounded-lg transition-colors"
+                >
+                  Retake Quiz
+                </button>
+              </div>
+            )}
+          </div>
+        </section>
+
+        {/* WHAT CAN I DO? SECTION */}
+        <section className="bg-[#1b4332] border border-[#2d6a4f] rounded-2xl p-6 sm:p-8 shadow-xl space-y-6">
+          <div>
+            <div className="inline-flex items-center space-x-2 text-[#74c69d] text-xs font-bold uppercase tracking-wider mb-1">
+              <ShieldCheck className="w-4 h-4" />
+              <span>Student Action Plan</span>
+            </div>
+            <h2 className="text-xl sm:text-2xl font-bold text-white">What Can I Do in Real Life & School?</h2>
+            <p className="text-sm text-gray-300 mt-1">Simple steps to practice circular business and environmental management today.</p>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div className="bg-[#112a20]/70 p-5 rounded-xl border border-[#2d6a4f]/60 space-y-2">
+              <div className="w-8 h-8 bg-[#2d6a4f] rounded-lg flex items-center justify-center text-[#74c69d] font-bold text-sm">
+                1
+              </div>
+              <h3 className="text-base font-semibold text-white">Start a Cap Collection Drive</h3>
+              <p className="text-xs text-gray-300 leading-relaxed">
+                Set up a dedicated plastic bottle cap box in your classroom. Make sure caps are washed and separated from the bottles.
+              </p>
+            </div>
+
+            <div className="bg-[#112a20]/70 p-5 rounded-xl border border-[#2d6a4f]/60 space-y-2">
+              <div className="w-8 h-8 bg-[#2d6a4f] rounded-lg flex items-center justify-center text-[#74c69d] font-bold text-sm">
+                2
+              </div>
+              <h3 className="text-base font-semibold text-white">Connect with Local Recyclers</h3>
+              <p className="text-xs text-gray-300 leading-relaxed">
+                Donate collected caps to Precious Plastic networks or local upcycling makers who compress plastic into school goods.
+              </p>
+            </div>
+
+            <div className="bg-[#112a20]/70 p-5 rounded-xl border border-[#2d6a4f]/60 space-y-2">
+              <div className="w-8 h-8 bg-[#2d6a4f] rounded-lg flex items-center justify-center text-[#74c69d] font-bold text-sm">
+                3
+              </div>
+              <h3 className="text-base font-semibold text-white">Design an ESG School Project</h3>
+              <p className="text-xs text-gray-300 leading-relaxed">
+                Create a mini business proposal showing how local businesses can adopt reverse logistics to reduce plastic waste.
+              </p>
+            </div>
+
+            <div className="bg-[#112a20]/70 p-5 rounded-xl border border-[#2d6a4f]/60 space-y-2">
+              <div className="w-8 h-8 bg-[#2d6a4f] rounded-lg flex items-center justify-center text-[#74c69d] font-bold text-sm">
+                4
+              </div>
+              <h3 className="text-base font-semibold text-white">Practice Smart Purchasing</h3>
+              <p className="text-xs text-gray-300 leading-relaxed">
+                Support companies that transparently share their recycled material data and avoid falling for greenwashing claims.
+              </p>
+            </div>
+          </div>
+        </section>
+
+        {/* SOURCES & FOOTNOTE */}
+        <footer className="bg-[#112a20] border-t border-[#2d6a4f] pt-6 text-xs text-gray-400 space-y-3">
+          <div className="flex items-center space-x-2 text-[#74c69d] font-bold">
+            <BookOpen className="w-4 h-4" />
+            <span>References & Educational Sources</span>
+          </div>
+          <ul className="list-disc list-inside space-y-1 text-gray-400">
+            <li>Ellen MacArthur Foundation - <em>Circular Economy & Plastics Management Guide</em>.</li>
+            <li>United Nations Environment Programme (UNEP) - <em>Single-Use Plastics: A Roadmap for Sustainability</em>.</li>
+            <li>Precious Plastic Global Open-Source Initiative - <em>HDPE/PP Compression & Shredding Techniques</em>.</li>
+          </ul>
+          <p className="text-[11px] text-gray-500 pt-2 border-t border-[#2d6a4f]/30">
+            Designed for high school student education (Ages 15-18). No personal data collected.
+          </p>
+        </footer>
+
+      </main>
+    </div>
+  );
+}
